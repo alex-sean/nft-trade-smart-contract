@@ -5,10 +5,10 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract TestERC721 is ERC721, Ownable {
-    string private baseURI = "";
+    string public baseURI = "";
 
-    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) {
-        
+    constructor(string memory name_, string memory symbol_, string memory baseURI_) ERC721(name_, symbol_) {
+        baseURI = baseURI_;
     }
 
     /**

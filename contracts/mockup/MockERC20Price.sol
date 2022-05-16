@@ -33,6 +33,6 @@ contract MockERC20Price is Ownable, IERC20Price {
         address _token
     ) external override view returns (uint256) {
         uint256 avaxPrice = _getAVAXPrice();
-        return avaxPrice.mul(5);
+        return avaxPrice.mul(2);
     }
 }

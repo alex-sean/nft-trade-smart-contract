@@ -12,7 +12,7 @@ struct SellOrder {
     uint256 usdtPrice;
     
     bool isStableCoin;  // if sell token in stable coin, set true
-    address[] erc20ContractAddress;
+    address[] erc20ContractAddresses;
 
     OrderType orderType;
 
