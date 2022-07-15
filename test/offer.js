@@ -12,8 +12,8 @@ describe("Exchange Offering", async () => {
     exchange = await Exchange.deploy();
     await exchange.deployed();
 
-    const NFT = await ethers.getContractFactory("TestERC721");
-    nft = await NFT.deploy("Test", "TEST", "http://localhost/metadata/");
+    const NFT = await ethers.getContractFactory("NFT");
+    nft = await NFT.deploy("Test", "TEST", exchange.address, "");
     await nft.deployed();
     await nft.mintAll(100);
 

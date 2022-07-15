@@ -5,17 +5,21 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "./const/OrderStatus.sol";
 import "./const/OrderType.sol";
+import "./const/ListBaseCurrency.sol";
 import "./const/OfferStatus.sol";
 import "./structure/SellOrder.sol";
 import "./structure/BidOrder.sol";
 import "./structure/OfferOrder.sol";
 import "./interface/IERC20Price.sol";
+import "./interface/IExchange.sol";
 import "hardhat/console.sol";
 
-contract Exchange is Ownable {
+contract Exchange is Ownable, IExchange {
     using SafeMath for uint256;
+    using Address for address;
 
     // sellOrders mapping(owner => mapping (collection => mapping(tokenId => SellOrder)));
     mapping(address => mapping(address => mapping(uint256 => SellOrder))) private sellOrders; 
@@ -107,6 +111,7 @@ contract Exchange is Ownable {
      * @param erc20ContractAddresses accepctable erc20 contract addresses
      * @param orderType order type(with fixed price or auction)
      * @param auctionEndTime auction end time. if selling with fixed price, set 0
+     * @param baseCurrency USD or AVAX
      */
     event List (
         address owner,
@@ -116,7 +121,8 @@ contract Exchange is Ownable {
         bool isStableCoin,
         address[] erc20ContractAddresses,
         OrderType orderType,
-        uint256 auctionEndTime
+        uint256 auctionEndTime,
+        ListBaseCurrency baseCurrency
     );
 
     /**
@@ -210,6 +216,44 @@ contract Exchange is Ownable {
         uint256 tokenId,
         address buyer,
         address erc20Address
+    );
+
+    /**
+     * @dev event of NFT Transfer
+     * @param collectionAddress collection address
+     * @param tokenId token id
+     * @param from from address
+     * @param to to address
+     */
+    event NFTTransfer(
+        address collectionAddress,
+        uint256 tokenId,
+        address from,
+        address to
+    );
+
+    /**
+     * @dev event of NFT mint
+     * @param collectionAddress collection address
+     * @param supply supply
+     * @param owner owner address
+     */
+    event NFTMint(
+        address collectionAddress,
+        uint256 supply,
+        address owner
+    );
+
+    /**
+     * @dev event of NFT burn
+     * @param collectionAddress collection address
+     * @param tokenId token id
+     * @param owner owner address
+     */
+    event NFTBurn(
+        address collectionAddress,
+        uint256 tokenId,
+        address owner
     );
 
     constructor() {
@@ -398,6 +442,7 @@ contract Exchange is Ownable {
      * @param erc20ContractAddresses accepctable erc20 contract addresses
      * @param orderType order type(with fixed price or auction)
      * @param auctionEndTime auction end time. if selling with fixed price, set 0
+     * @param baseCurrency base currency(USD or AVAX)
      */
     function list(
         address collectionAddress,
@@ -406,7 +451,8 @@ contract Exchange is Ownable {
         bool isStableCoin,
         address[] memory erc20ContractAddresses,
         OrderType orderType,
-        uint256 auctionEndTime
+        uint256 auctionEndTime,
+        ListBaseCurrency baseCurrency
     ) external {
         require(IERC721(collectionAddress).ownerOf(tokenId) == msg.sender, "Owner is not token owner.");
         require(IERC721(collectionAddress).getApproved(tokenId) == address(this), "NFT token is not approved.");
@@ -440,7 +486,8 @@ contract Exchange is Ownable {
             isStableCoin,
             erc20ContractAddresses,
             orderType, 
-            auctionEndTime
+            auctionEndTime,
+            baseCurrency
         );
     }
 
@@ -688,5 +735,49 @@ contract Exchange is Ownable {
         }
         
         require(false, "Not existing bid order.");
+    }
+
+    /**
+     * @dev emit transfer event
+     * @param tokenId nft token id
+     * @param from from address
+     * @param to to address
+     */
+    function emitTransferEvent(
+        uint256 tokenId,
+        address from,
+        address to
+    ) external override {
+        require(msg.sender.isContract(), "Collection is not contract.");
+
+        emit NFTTransfer(msg.sender, tokenId, from, to);
+    }
+
+    /**
+     * @dev emit mint event
+     * @param supply supply
+     * @param owner owner
+     */
+    function emitNFTMintEvent(
+        uint256 supply,
+        address owner
+    ) external override {
+        require(msg.sender.isContract(), "Collection is not contract.");
+
+        emit NFTMint(msg.sender, supply, owner);
+    }
+
+    /**
+     * @dev emit burn event
+     * @param tokenId supply
+     * @param owner owner
+     */
+    function emitNFTBurnEvent(
+        uint256 tokenId,
+        address owner
+    ) external override {
+        require(msg.sender.isContract(), "Collection is not contract.");
+
+        emit NFTBurn(msg.sender, tokenId, owner);
     }
 }

@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interface/PancakeSwapInterface.sol";
 import "./interface/IERC20Price.sol";
 
@@ -59,7 +60,12 @@ contract BEP20Price is Ownable, IERC20Price {
     function _getAVAXPrice() internal view returns (uint256) {
         (uint256 avaxReserve, uint256 usdtReserve) = 
             _getLiquidityInfo(avaxAddress, usdtAddress);
-        return usdtReserve.mul(10 ** 18).div(avaxReserve);
+
+        return 
+            usdtReserve.mul(10 ** 18)
+            .mul(ERC20(avaxAddress).decimals())
+            .div(avaxReserve)
+            .div(ERC20(usdtAddress).decimals());
     }
 
     /**
@@ -83,6 +89,10 @@ contract BEP20Price is Ownable, IERC20Price {
         (uint256 tokenReserve, uint256 avaxReserve) = 
             _getLiquidityInfo(_token, avaxAddress);
         uint256 avaxPrice = _getAVAXPrice();
-        return avaxReserve.mul(avaxPrice).div(tokenReserve);
+        return 
+            avaxReserve.mul(avaxPrice)
+            .mul(ERC20(_token).decimals())
+            .div(tokenReserve)
+            .div(ERC20(avaxAddress).decimals());
     }
 }

@@ -13,8 +13,8 @@ describe("Exchange Ordering", async () => {
     exchange = await Exchange.deploy();
     await exchange.deployed();
 
-    const NFT = await ethers.getContractFactory("TestERC721");
-    nft = await NFT.deploy("Test", "TEST", "http://localhost/metadata/");
+    const NFT = await ethers.getContractFactory("NFT");
+    nft = await NFT.deploy("Test", "TEST", exchange.address, "");
     await nft.deployed();
     await nft.mintAll(100);
 
@@ -98,6 +98,15 @@ describe("Exchange Ordering", async () => {
       await exchange.connect(address1).buyWithStableCoin(owner.address, nft.address, 1, {value: 100});
 
       expect(await ethers.provider.getBalance(exchange.address)).to.equal(3);
+    })
+
+    it("Buying with enough stable coin should be success and then listing again should be success.", async() => {
+      await exchange.connect(address1).buyWithStableCoin(owner.address, nft.address, 1, {value: 100});
+
+      expect(await ethers.provider.getBalance(exchange.address)).to.equal(3);
+
+      await nft.connect(address1).approve(exchange.address, 1);
+      await exchange.connect(address1).list(nft.address, 1, 100, true, [erc20.address], 1, 0);
     })
 
     it("Buying with unlisted token should be failed", async() => {

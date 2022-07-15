@@ -6,8 +6,13 @@
   "scripts": {
     "test": "npx hardhat test",
     "compile": "npx hardhat compile --force",
-    "deploy:testnet": "npx hardhat run scripts/deploy.js --network testnet",
-    "deploy:mainnet": "npx hardhat run scripts/deploy.js --network mainnet"
+    "deploy:nft:testnet": "npx hardhat run scripts/deploy_nft.js --network testnet",
+    "deploy:erc20_price:testnet": "npx hardhat run scripts/deploy_erc20_price.js --network testnet",
+    "deploy:erc20:testnet": "npx hardhat run scripts/deploy_erc20.js --network testnet",
+    "deploy:exchange:testnet": "npx hardhat run scripts/deploy_exchange.js --network testnet",
+    "deploy:nft:mainnet": "npx hardhat run scripts/deploy_nft.js --network mainnet",
+    "deploy:erc20_price:mainnet": "npx hardhat run scripts/deploy_erc20_price.js --network mainnet",
+    "deploy:exchange:mainnet": "npx hardhat run scripts/deploy_exchange.js --network mainnet"
   },
   "keywords": [],
   "author": "",
